@@ -3,21 +3,11 @@ import UIKit
 extension MainViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if(searchActive) {
-            return self.pokemonArrayFiltered.count
-        } else {
-            if self.pokemonsViewModel.pokemons != nil {
-                return (self.pokemonsViewModel.pokemons?.results!.count)!
-            } else {
-                return 0
-            }
-        }
+        return self.pokemonsViewModel.numberOfRows(searchIsActive: searchActive)
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let padding: CGFloat =  50
-        let collectionViewSize = collectionView.frame.size.width - padding
-        return CGSize(width: collectionViewSize/3, height: collectionViewSize/3)
+        return self.pokemonsViewModel.cellSize(collectionView: collectionView)
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
