@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import Kingfisher
 import ViewModel
+import RxSwift
 
 class MainViewController: UIViewController {
             
@@ -10,12 +11,14 @@ class MainViewController: UIViewController {
     var isFinalToLoad : Bool = false
     var pokemonsViewModel = PokemonsViewModel()
     var pokemonArrayFiltered: [[String:String]] = []
+    var disposeBag = DisposeBag()
+    
     public var detailViewController: DetailViewController?
     
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var searchBar: UISearchBar!
     @IBOutlet weak var loadingIndicator: UIActivityIndicatorView!
-    
+      
     override func viewDidLoad() {
         super.viewDidLoad()
         if let url = URL(string: "https://pokeapi.co/api/v2/pokemon") {
@@ -25,12 +28,18 @@ class MainViewController: UIViewController {
     
     func getPokemons(url: URL) {
         showLoading(true)
-        self.pokemonsViewModel.getPokemons(url: url) { [weak self] results in
-            DispatchQueue.main.async {
-                self?.collectionView.reloadData()
-                self?.showLoading(false)
+        self.pokemonsViewModel.get(url: url).subscribe(
+            onNext: { result in
+                self.collectionView.reloadData()
+                self.showLoading(false)
+            },
+            onError: { error in
+                self.showAlert(title: "Erro", message: "Ocorreu o seguinte erro - \(error.localizedDescription) ")
+            },
+            onCompleted: {
+                          
             }
-        }
+        ).disposed(by: disposeBag)
     }
     
     func showLoading(_ show: Bool) {
@@ -52,16 +61,7 @@ extension MainViewController: UISearchBarDelegate {
         if !searchBar.text!.isEmpty {
             self.searchActive = true
             self.isFinalToLoad = true
-            if let poke = self.pokemonsViewModel.pokemons?.results {
-                for item in poke {
-                    let name = item.name!.lowercased()
-                    if ((name.contains(searchBar.text!.lowercased()))) {
-                        self.pokemonsViewModel.appendPokemon(name: item.name!, url: item.url!)
-                    }
-                    print(name)
-                    print(searchBar.text!.lowercased())
-                }
-            }
+            self.pokemonsViewModel.pokemonNameToSearch = searchBar.text!.lowercased()
             if (searchBar.text!.isEmpty) {
                 self.searchActive = false
                 self.collectionView.reloadData()

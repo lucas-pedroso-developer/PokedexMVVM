@@ -37,7 +37,7 @@ extension DetailViewController: UICollectionViewDataSource, UICollectionViewDele
             cell.layer.borderColor = UIColor.white.cgColor
             cell.layer.borderWidth = 1
             cell.layer.cornerRadius = self.view.bounds.width*4/100
-            self.pokemonMainColor = UIColor(named: (self.pokemonDetailViewModel.pokemonDetail?.types?[indexPath.item].type?.name)!)
+            self.pokemonMainColor = UIColor(named: (self.pokemonDetailViewModel.pokemonDetail?.types?[indexPath.item].type?.name)!)            
             self.backNavBarButton.tintColor = self.pokemonMainColor
             self.segment.backgroundColor = self.pokemonMainColor
             self.abilityLabel.backgroundColor = self.pokemonMainColor

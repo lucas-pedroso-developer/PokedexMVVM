@@ -2,6 +2,7 @@ import Foundation
 import UIKit
 import Kingfisher
 import ViewModel
+import RxSwift
 
 class DetailViewController: UIViewController {
       
@@ -12,6 +13,7 @@ class DetailViewController: UIViewController {
      var pokemonDetailViewModel = PokemonDetailViewModel()
      var specieDetailViewModel = SpecieDetailViewModel()
      var evolutionChainDetailViewModel = EvolutionChainDetailViewModel()
+     var disposeBag = DisposeBag()
              
      @IBOutlet weak var pokemonNameLabel: UILabel!
      @IBOutlet weak var navbar: UINavigationBar!
@@ -89,35 +91,63 @@ class DetailViewController: UIViewController {
             self.abilityLabel.layer.cornerRadius = self.view.bounds.height*1/100
             self.dataDescriptionLabel.layer.cornerRadius = self.view.bounds.height*1/100
         }
-               
-        func getPokemon(url: URL) {
-            self.pokemonDetailViewModel.getPokemon(url: url) { [weak self] results in
-                self!.setPokemonImage()
-                self!.setPokemonData()
-                self!.setPokemonStatus()
-                self!.setPokemonAbilities()
-                self!.setPokemonTypes()
-                if let specieUrl = URL(string: (self!.pokemonDetailViewModel.pokemonDetail?.species?.url)!) {
-                    self!.getSpecie(url: specieUrl)
-                }                
-            }
-        }
             
-        func getSpecie(url: URL) {
-            self.specieDetailViewModel.getSpecie(url: url) { [weak self] results in
-                print(results)
-                self!.dataDescriptionLabel.text = self!.specieDetailViewModel.getDataDescription()
-                if let url = URL(string: (self!.specieDetailViewModel.specieDetail?.evolution_chain?.url)!) {
-                    self!.getPokemonEvolution(url: url)
+        func getPokemon(url: URL) {
+            self.showLoading(true)
+            self.pokemonDetailViewModel.getPokemon(url: url).subscribe(
+                onNext: { result in
+                    self.setPokemonImage()
+                    self.setPokemonData()
+                    self.setPokemonStatus()
+                    self.setPokemonAbilities()
+                    self.setPokemonTypes()
+                    if let specieUrl = URL(string: (self.pokemonDetailViewModel.pokemonDetail?.species?.url)!) {
+                        self.getSpecie(url: specieUrl)
+                    }
+                    self.showLoading(false)
+                },
+                onError: { error in
+                    self.showAlert(title: "Erro", message: "Ocorreu o seguinte erro - \(error.localizedDescription) ")
+                },
+                onCompleted: {
+                    print("Finish")
                 }
-            }
+            ).disposed(by: disposeBag)
+        }
+    
+        func getSpecie(url: URL) {
+            self.showLoading(true)
+            self.specieDetailViewModel.getSpecie(url: url).subscribe(
+                onNext: { result in
+                    self.dataDescriptionLabel.text = self.specieDetailViewModel.getDataDescription()
+                    if let url = URL(string: (self.specieDetailViewModel.specieDetail?.evolution_chain?.url)!) {
+                        self.getPokemonEvolution(url: url)
+                    }
+                    self.showLoading(false)
+                },
+                onError: { error in
+                    self.showAlert(title: "Erro", message: "Ocorreu o seguinte erro - \(error.localizedDescription) ")
+                },
+                onCompleted: {
+                    print("Finish")
+                }
+            ).disposed(by: disposeBag)
         }
              
         func getPokemonEvolution(url: URL) {
-            self.evolutionChainDetailViewModel.getPokemonEvolution(url: url) { [weak self] results in
-                self?.showLoading(false)
-                self?.evolutionCollectionView.reloadData()
-            }
+            self.showLoading(true)
+            self.evolutionChainDetailViewModel.getPokemonEvolution(url: url).subscribe(
+                onNext: { result in
+                    self.evolutionCollectionView.reloadData()
+                    self.showLoading(false)
+                },
+                onError: { error in
+                    self.showAlert(title: "Erro", message: "Ocorreu o seguinte erro - \(error.localizedDescription) ")
+                },
+                onCompleted: {
+                    print("Finish")
+                }
+            ).disposed(by: disposeBag)
         }
             
         private func setPokemonImage() {

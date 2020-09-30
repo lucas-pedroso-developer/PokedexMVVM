@@ -1,6 +1,7 @@
 import Foundation
 import Model
 import Infra
+import RxSwift
 
 public class SpecieDetailViewModel {
     
@@ -24,22 +25,24 @@ public class SpecieDetailViewModel {
         return ""
     }
     
-    public func getSpecie(url: URL, completion: @escaping (Result<SpecieDetail?, HttpError>) -> Void) {
-        service.get(url: url) { result in
-            switch result {
-            case .success(let data):
-                if data != nil {
-                    if let specie: SpecieDetail = data?.toModel() {
-                        self.specieDetail = specie
-                        completion(.success(self.specieDetail))
+    public func getSpecie(url: URL) -> Observable<(Result<SpecieDetail?, HttpError>)> {
+        return Observable.create { observer in
+            self.service.get(url: url) { result in
+                switch result {
+                case .success(let data):
+                    if data != nil {
+                        if let specie: SpecieDetail = data?.toModel() {
+                            self.specieDetail = specie
+                            observer.onNext(.success(self.specieDetail))
+                        }
+                    } else {
+                        observer.onNext(.failure(.noConnectivity))
                     }
-                } else {
-                    completion(.failure(.noConnectivity))
+                case .failure(let error):
+                    observer.onNext(.failure(.noConnectivity))
                 }
-            case .failure(let error):
-                completion(.failure(.noConnectivity))                
             }
+            return Disposables.create()
         }
-    }
-    
+    }        
 }

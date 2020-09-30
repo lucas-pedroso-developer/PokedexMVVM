@@ -1,6 +1,7 @@
 import Foundation
 import Model
 import Infra
+import RxSwift
 
 public class EvolutionChainDetailViewModel {
     
@@ -12,12 +13,10 @@ public class EvolutionChainDetailViewModel {
     
     func getEvolutionArray() -> [Species] {
         var array: [Species] = []
-        
         if let evolves = self.evolutionChainDetail?.chain?.evolves_to {
             array.append((self.evolutionChainDetail?.chain?.species)!)
             var evolvesToData = evolves
-            var hasEvolution = true
-                          
+            var hasEvolution = true                          
             while hasEvolution {
                 if evolvesToData.isEmpty {
                     hasEvolution = false
@@ -34,27 +33,28 @@ public class EvolutionChainDetailViewModel {
                 }
             }
         }
-        print(array)
         return array
     }
     
-    public func getPokemonEvolution(url: URL, completion: @escaping (Result<EvolutionChainDetail?, HttpError>) -> Void) {
-        service.get(url: url) { result in
-            switch result {
-            case .success(let data):
-                if data != nil {
-                    if let evolution: EvolutionChainDetail = data?.toModel() {
-                        self.evolutionChainDetail = evolution
-                        self.speciesArray = self.getEvolutionArray()
-                        completion(.success(self.evolutionChainDetail))
+    public func getPokemonEvolution(url: URL) -> Observable<(Result<EvolutionChainDetail?, HttpError>)> {
+        return Observable.create { observer in
+            self.service.get(url: url) { result in
+                switch result {
+                case .success(let data):
+                    if data != nil {
+                        if let evolution: EvolutionChainDetail = data?.toModel() {
+                            self.evolutionChainDetail = evolution
+                            self.speciesArray = self.getEvolutionArray()
+                            observer.onNext(.success(self.evolutionChainDetail))
+                        }
+                    } else {
+                        observer.onNext(.failure(.noConnectivity))
                     }
-                } else {
-                    completion(.failure(.noConnectivity))
+                case .failure(let error):
+                    observer.onNext(.failure(.noConnectivity))
                 }
-            case .failure(let error):
-                completion(.failure(.noConnectivity))
             }
+            return Disposables.create()
         }
-    }
-    
+    }        
 }

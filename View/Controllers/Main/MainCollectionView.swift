@@ -1,8 +1,10 @@
 import UIKit
 
+
 extension MainViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {        
         return self.pokemonsViewModel.numberOfRows(searchIsActive: searchActive)
     }
     
@@ -17,7 +19,7 @@ extension MainViewController: UICollectionViewDataSource, UICollectionViewDelega
             cell.label.text = self.pokemonsViewModel.resultsArray?[indexPath.item].name!
             let url = self.pokemonsViewModel.resultsArray?[indexPath.item].url
             let id = String(format: "%03d", Int(url!.split(separator: "/").last!)!)
-            var imageUrl = URL(string: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/\(id).png")!
+            let imageUrl = URL(string: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/\(id).png")!
             cell.imageView.kf.setImage(with: imageUrl)
         } else {
             if let name = self.pokemonsViewModel.pokemons?.results?[indexPath.item].name {
@@ -25,7 +27,7 @@ extension MainViewController: UICollectionViewDataSource, UICollectionViewDelega
             }
             if let url = self.pokemonsViewModel.pokemons?.results?[indexPath.item].url {
                 let id = String(format: "%03d", Int(url.split(separator: "/").last!)!)
-                var imageUrl = URL(string: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/\(id).png")!
+                let imageUrl = URL(string: "https://assets.pokemon.com/assets/cms2/img/pokedex/full/\(id).png")!
                 cell.imageView.kf.setImage(with: imageUrl)
             }
         }
@@ -47,7 +49,7 @@ extension MainViewController: UICollectionViewDataSource, UICollectionViewDelega
                             
                             self.getPokemons(url: URL(string: "https://pokeapi.co/api/v2/pokemon?offset=780&limit=27")!)
                             self.isFinalToLoad = true
-                        }
+                        }                    
                 }
             }
         }
