@@ -37,25 +37,4 @@ public class HttpService {
             }
         }
     }
-    
-    
-    
-    
-    /*private func populateNews() {
-        self.navigationController?.navigationBar.prefersLargeTitles = true
-       URLRequest.load(resource: ArticleList.all)
-            .subscribe(onNext: { [weak self] result in
-                print(result)
-                if let result = result {
-                    self?.articleListVM = ArticleListViewModel(articleList: result)
-                    DispatchQueue.main.async {
-                        self?.tableView.reloadData()
-                    }
-                } else {
-                    print("erro")
-                }
-            })
-    }*/
 }
-
-
